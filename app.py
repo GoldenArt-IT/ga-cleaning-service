@@ -47,7 +47,7 @@ df = df.dropna(how="all")
 # st.dataframe(df)
 
 # — Title —
-st.title("📲 GA TRADE-IN CALCULATOR")
+st.title("🧼 GA CLEANING SERVICE")
 
 # — Model selector —
 model = st.selectbox("Select Model:", df["MODEL"])
@@ -158,13 +158,13 @@ with seg3:
 
 total_trade_in_value = round(trade_value - ncd_deduction_value + bonus_value, 2)
 
-st.markdown(f"**TOTAL TRADE IN VALUE : RM {total_trade_in_value}**")
+st.markdown(f"**TOTAL VALUE AFTER CLEANING: RM {total_trade_in_value}**")
 
-submitted = st.button("Save Trade-in Records")
+submitted = st.button("Save Cleaning Records")
 
 if submitted:
   conn = st.connection("gsheets", type=GSheetsConnection)
-  df_records = conn.read(worksheet="TRADE IN RECORDS", ttl=1)
+  df_records = conn.read(worksheet="CLEANING SERVICE RECORD", ttl=1)
   df_records = df_records.dropna(how="all")
 
   # st.write(df_records[:0])
@@ -196,7 +196,7 @@ if submitted:
   new_index = df_records.index.max() + 1 if not df_records.empty else 0
   new_data = pd.DataFrame([row_data], columns=df_records.columns, index=[new_index])
   update_df = pd.concat([df_records, new_data], ignore_index=True)
-  conn.update(worksheet="TRADE IN RECORDS", data=update_df)
+  conn.update(worksheet="CLEANING SERVICE RECORD", data=update_df)
   st.success("Record updated successfully.")
 
 st.divider()
