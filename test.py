@@ -7,21 +7,25 @@ import base64
 from PIL import Image
 import io
 
-# 1. Products & base prices
-products = {"1 SEATER SOFA": 50.0, "2 SEATERS SOFA": 100.0, "3 SEATER SOFA": 150.0}
+st.title("🧼 GA CLEANING SERVICE")
 
-# 2. Pick item
-item = st.selectbox("Pick item to service", list(products.keys()))
+# Load data from Google Sheets
+conn = st.connection("gsheets", type=GSheetsConnection)
+df = conn.read(worksheet="DATA", ttl=3000)
+df = df.dropna(how="all")
+
+# Pick item
+products = st.selectbox("Pick type of products to service", df["PRODUCT TYPE"])
 
 # 3. Section base price
-base = products[item]
-section_base = base / 4
+product_price = df.loc[df["PRODUCT TYPE"] == products].iloc[0]["PRODUCT SERVICE PRICE"]
+section_base = product_price / 4
 
 # 4. Rate map
 rate_map = {5:1.0, 4:1.2, 3:1.4, 2:1.6, 1:1.8}
 
-# 5. Four columns: one per section :contentReference[oaicite:0]{index=0}
-sec_names = ["Stain Level", "Discolor Level", "Scratch Level", "Other Substance Level"]
+# 5. Section selection
+sec_names = ["Stain Rating", "Discolor Rating", "Scratch Rating", "Other Substance Rating"]
 cols = st.columns(4)
 
 scores = {}
