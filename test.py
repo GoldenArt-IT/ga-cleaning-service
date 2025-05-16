@@ -11,15 +11,37 @@ st.title("🧼 GA CLEANING SERVICE")
 
 # Load data from Google Sheets
 conn = st.connection("gsheets", type=GSheetsConnection)
-df = conn.read(worksheet="DATA", ttl=3000)
-df = df.dropna(how="all")
+
+@st.cache_data(ttl=3000)
+def load_data(data, ttl):
+    df = conn.read(worksheet=data, ttl=ttl)
+    df = df.dropna(how="all")
+    return df
+
+df = load_data("DATA", 3000)
+df_records = load_data("CLEANING SERVICE RECORDS", 1)
+
+# session state
+defaults = {
+    "product": df["PRODUCT TYPE"].iloc[0],
+    "quantity": 1,
+    "Stain Rating": 5,
+    "Discolor Rating": 5,
+    "Scratch Rating": 5,
+    "Other Substance Rating": 5
+}
+for k, v in defaults.items():
+    if k not in st.session_state:
+        st.session_state[k] = v
 
 # Pick item
-products = st.selectbox("Select product to service", df["PRODUCT TYPE"])
+products = st.selectbox("Select product to service", df["PRODUCT TYPE"].unique(), key="product")
 product_row = df.query("`PRODUCT TYPE` == @products").squeeze() # get the row of the selected product
 
 # Create a control statement if the user selects a product
 product_multiplier = 1 # default value
+product_unit = "N/A" # default value
+
 product_types = ["CARPET", "CURTAIN CLEANING", "OFFICE CARPET", "DINING CHAIR", "OFFICE CHAIR"] # product types that require a multiplier
 if products in product_types:
     product_unit = product_row.get("PRODUCT UNIT") 
@@ -57,4 +79,40 @@ col1, col2 = st.columns([1,1])
 col1.metric("Cleaning price", f"RM {round(total, 1):.2f}")
 col2.metric("Cleaning price (after tax)", f"RM {round(total*1.1, 1):.2f}")
 
-st.write()
+def save_and_clear():
+    for k, v in defaults.items():
+        st.session_state[k] = v
+    st.success("Cleaning records saved successfully!")
+
+submitted = st.button("Save cleaning records", on_click=save_and_clear)
+
+if submitted:
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    row_data = {
+        "Timestamp": timestamp,
+        "Product": products,
+        "Base price per section": section_base,
+        "Product Unit": product_unit,
+        "Multiplier": product_multiplier,
+        "Rate map": rate_map,
+        "Scores": scores,
+        "Total price": round(total, 1),
+        "Total price (after tax)": round(total * 1.1, 1)
+    }
+
+    new_index = len(df_records) + 1 if not df_records.empty else 0
+    new_data = pd.DataFrame([row_data], columns=df_records.columns, index=[new_index])
+    df_records = pd.concat([df_records, new_data], ignore_index=True) 
+    conn.update(worksheet="CLEANING SERVICE RECORDS", data=df_records)
+
+
+# Uncomment the following lines to see the debug information
+# st.write("Selected Product:", products)
+# st.write("Base price per section:", section_base)
+# st.write("Product Unit:", product_unit)
+# st.write("Multiplier:", product_multiplier)
+# st.write("Rate map:", rate_map)
+# st.write("Scores:", scores)
+# st.write("Total price:", round(total, 1))
+# st.write("Total price (after tax):", round(total * 1.1, 1))
