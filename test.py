@@ -54,5 +54,7 @@ total = sum(section_base * rate_map[s] for s in scores.values())
 # Display
 st.divider()
 col1, col2 = st.columns([1,1])
-col1.metric("Cleaning price", f"RM {total:.2f}")
-col2.metric("Cleaning price (after tax)", f"RM {total*1.1:.2f}")
+col1.metric("Cleaning price", f"RM {round(total, 1):.2f}")
+col2.metric("Cleaning price (after tax)", f"RM {round(total*1.1, 1):.2f}")
+
+st.write()
