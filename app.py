@@ -108,8 +108,6 @@ def save_and_clear():
         st.session_state[k] = v
     st.success("Cleaning records saved successfully!")
 
-    st.success("Cleaning records saved successfully!")
-
 submitted = st.button("Save cleaning records", on_click=save_and_clear)
 
 
