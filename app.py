@@ -6,6 +6,9 @@ from datetime import datetime
 import base64
 from PIL import Image
 import io
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+import json
 
 st.title("🧼 GA CLEANING SERVICE")
 
@@ -22,6 +25,20 @@ def load_records(data, ttl):
     df = conn.read(worksheet=data, ttl=ttl)
     df = df.dropna(how="all")
     return df
+
+def add_record(worksheet, tabsheet, data):
+    creds_dict = dict(st.secrets["connections"]["gsheets"])
+    creds_json = json.loads(json.dumps(creds_dict))
+
+    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+    credentials = ServiceAccountCredentials.from_json_keyfile_dict(creds_json, scope)
+
+    client = gspread.authorize(credentials)
+    sheet = client.open(worksheet).worksheet(tabsheet)
+    return sheet.append_row(data)
+
+def sanitize_row_values(data: dict) -> list:
+    return [json.dumps(v) if isinstance(v, (dict, list)) else v for v in data.values()]
 
 df = load_data("DATA", 3000)
 
@@ -84,25 +101,23 @@ col1.metric("Cleaning price", f"RM {round(total, 1):.2f}")
 col2.metric("Cleaning price (after tax)", f"RM {round(total*1.1, 1):.2f}")
 
 def save_and_clear():
-    df_records = load_records("CLEANING SERVICE RECORDS", 1)
-    new_index = df_records.index.max() + 1 if not df_records.empty else 0
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
+    # dict type row data
     row_data = {
         "Timestamp": timestamp,
         "Product": products,
         "Base price per section": section_base,
         "Product Unit": product_unit,
         "Multiplier": product_multiplier,
-        "Rate map": rate_map,
-        "Scores": scores,
+        "Rate map": rate_map,     # dict type
+        "Scores": scores,         # dict type
         "Total price": round(total, 1),
         "Total price (after tax)": round(total * 1.1, 1)
     }
 
-    new_data = pd.DataFrame([row_data], columns=df_records.columns, index=[new_index])
-    df_records = pd.concat([df_records, new_data], ignore_index=True) 
-    conn.update(worksheet="CLEANING SERVICE RECORDS", data=df_records)
+    row_data = sanitize_row_values(row_data)
+    add_record("SOFA TRADE IN CHECKER", "CLEANING SERVICE RECORDS", row_data)
 
     for k, v in defaults.items():
         st.session_state[k] = v
