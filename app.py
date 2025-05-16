@@ -9,6 +9,7 @@ import io
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import json
+import time
 
 st.title("🧼 GA CLEANING SERVICE")
 
@@ -121,7 +122,8 @@ def save_and_clear():
 
     for k, v in defaults.items():
         st.session_state[k] = v
-    st.success("Cleaning records saved successfully!")
+    st.toast("Cleaning records saved successfully!")
+    time.sleep(3)
 
 submitted = st.button("Save cleaning records", on_click=save_and_clear)
 
