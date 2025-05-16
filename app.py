@@ -104,6 +104,10 @@ def save_and_clear():
     df_records = pd.concat([df_records, new_data], ignore_index=True) 
     conn.update(worksheet="CLEANING SERVICE RECORDS", data=df_records)
 
+    for k, v in defaults.items():
+        st.session_state[k] = v
+    st.success("Cleaning records saved successfully!")
+
     st.success("Cleaning records saved successfully!")
 
 submitted = st.button("Save cleaning records", on_click=save_and_clear)
