@@ -2,7 +2,6 @@ import streamlit as st
 from streamlit_gsheets import GSheetsConnection
 import pandas as pd
 from datetime import datetime
-# from upload_to_drive import upload_file_to_drive
 import base64
 from PIL import Image
 import io
@@ -21,24 +20,6 @@ st.markdown("""
   }
 </style>
 """, unsafe_allow_html=True)
-
-# # — Inject CSS to hide the big drop‑zone and only show the small button —
-# hide_dropzone = """
-# <style>
-#   /* remove the grey box around uploader */
-#   section[data-testid="stFileUploadDropzone"] {
-#     border: none !important;
-#     background: transparent !important;
-#     padding: 0 !important;
-#     margin: 0 !important;
-#   }
-#   /* hide drag‑and‑drop instructions */
-#   div[data-testid="stFileDropzoneInstructions"] {
-#     display: none !important;
-#   }
-# </style>
-# """
-# st.markdown(hide_dropzone, unsafe_allow_html=True)  # :contentReference[oaicite:0]{index=0}
 
 # — Load data from Google Sheets —
 conn = st.connection("gsheets", type=GSheetsConnection)
@@ -139,7 +120,7 @@ with seg1:
     select_year_trade_value = select_year["TRADE IN VALUE"]
     trade_value = price - (price/100) * select_year_trade_value
 
-    trade_in_value = st.text_input("TRADE IN VALUE (RM)", round(trade_value, 2), disabled=True)
+    trade_in_value = st.text_input("SECOND HAND VALUE (RM)", round(trade_value, 2), disabled=True)
 with seg2:
     st.text_input("NCD SCORE", value=str(total_ncd), disabled=True)
 
