@@ -15,16 +15,24 @@ df = conn.read(worksheet="DATA", ttl=3000)
 df = df.dropna(how="all")
 
 # Pick item
-products = st.selectbox("Pick type of products to service", df["PRODUCT TYPE"])
+products = st.selectbox("Select product to service", df["PRODUCT TYPE"])
+product_row = df.query("`PRODUCT TYPE` == @products").squeeze() # get the row of the selected product
 
-# 3. Section base price
-product_price = df.loc[df["PRODUCT TYPE"] == products].iloc[0]["PRODUCT SERVICE PRICE"]
-section_base = product_price / 4
+# Create a control statement if the user selects a product
+product_multiplier = 1 # default value
+product_types = ["CARPET", "CURTAIN CLEANING", "OFFICE CARPET", "DINING CHAIR", "OFFICE CHAIR"] # product types that require a multiplier
+if products in product_types:
+    product_unit = product_row.get("PRODUCT UNIT") 
+    product_multiplier = st.number_input(f" The {product_unit} for this product?")
 
-# 4. Rate map
+# Section base price
+product_price = product_row.get("PRODUCT SERVICE PRICE")
+section_base = product_price * product_multiplier / 4
+
+# Rate map
 rate_map = {5:1.0, 4:1.2, 3:1.4, 2:1.6, 1:1.8}
 
-# 5. Section selection
+# Section selection
 sec_names = ["Stain Rating", "Discolor Rating", "Scratch Rating", "Other Substance Rating"]
 cols = st.columns(4)
 
@@ -40,8 +48,11 @@ for col, sec in zip(cols, sec_names):
             key=sec
         )
 
-# 6. Total price
+# Total price
 total = sum(section_base * rate_map[s] for s in scores.values())
 
-# 7. Display
-st.metric("Cleaning price", f"RM {total:.2f}")
+# Display
+st.divider()
+col1, col2 = st.columns([1,1])
+col1.metric("Cleaning price", f"RM {total:.2f}")
+col2.metric("Cleaning price (after tax)", f"RM {total*1.1:.2f}")
