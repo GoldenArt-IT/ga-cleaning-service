@@ -18,8 +18,12 @@ def load_data(data, ttl):
     df = df.dropna(how="all")
     return df
 
+def load_records(data, ttl):
+    df = conn.read(worksheet=data, ttl=ttl)
+    df = df.dropna(how="all")
+    return df
+
 df = load_data("DATA", 3000)
-df_records = load_data("CLEANING SERVICE RECORDS", 1)
 
 # session state
 defaults = {
@@ -80,28 +84,26 @@ col1.metric("Cleaning price", f"RM {round(total, 1):.2f}")
 col2.metric("Cleaning price (after tax)", f"RM {round(total*1.1, 1):.2f}")
 
 def save_and_clear():
-    if submitted:
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        
-        row_data = {
-            "Timestamp": timestamp,
-            "Product": products,
-            "Base price per section": section_base,
-            "Product Unit": product_unit,
-            "Multiplier": product_multiplier,
-            "Rate map": rate_map,
-            "Scores": scores,
-            "Total price": round(total, 1),
-            "Total price (after tax)": round(total * 1.1, 1)
-        }
+    df_records = load_records("CLEANING SERVICE RECORDS", 1)
+    new_index = df_records.index.max() + 1 if not df_records.empty else 0
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    row_data = {
+        "Timestamp": timestamp,
+        "Product": products,
+        "Base price per section": section_base,
+        "Product Unit": product_unit,
+        "Multiplier": product_multiplier,
+        "Rate map": rate_map,
+        "Scores": scores,
+        "Total price": round(total, 1),
+        "Total price (after tax)": round(total * 1.1, 1)
+    }
 
-        new_index = len(df_records) + 1 if not df_records.empty else 0
-        new_data = pd.DataFrame([row_data], columns=df_records.columns, index=[new_index])
-        df_records = pd.concat([df_records, new_data], ignore_index=True) 
-        conn.update(worksheet="CLEANING SERVICE RECORDS", data=df_records)
+    new_data = pd.DataFrame([row_data], columns=df_records.columns, index=[new_index])
+    df_records = pd.concat([df_records, new_data], ignore_index=True) 
+    conn.update(worksheet="CLEANING SERVICE RECORDS", data=df_records)
 
-    for k, v in defaults.items():
-        st.session_state[k] = v
     st.success("Cleaning records saved successfully!")
 
 submitted = st.button("Save cleaning records", on_click=save_and_clear)
