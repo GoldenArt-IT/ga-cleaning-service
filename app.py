@@ -6,10 +6,6 @@ from datetime import datetime
 import base64
 from PIL import Image
 import io
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-import json
-import time
 
 st.title("🧼 GA CLEANING SERVICE")
 
@@ -37,7 +33,9 @@ def load_records(data, ttl):
     df = df.dropna(how="all")
     return df
 
-df = load_data("DATA", 3000)
+df = load_data("SETTING", 3000, False)
+df_arrangement = load_data_ALWAYS_RELOAD("RECORDS", 20, True) # load records from ga cleaning service - arrangement
+df_arrangement = df_arrangement.query("`CLEANING SERVICE` == 'ON PROGRESS'")
 
 # session states
 defaults = {
@@ -164,31 +162,28 @@ col1.metric("Cleaning price", f"RM {round(total, 1):.2f}")
 # col2.metric("Cleaning price (after tax)", f"RM {round(total*1.1, 1):.2f}")
 
 def save_and_clear():
-    df_records = load_records("CLEANING SERVICE RECORDS", 1)
+    df_records = load_records("CLEANING RECORDS", 1)
     new_index = df_records.index.max() + 1 if not df_records.empty else 0
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
-    # dict type row data
     row_data = {
-        "Timestamp": timestamp,
-        "Product": products,
-        "Base price per section": section_base,
-        "Product Unit": product_unit,
-        "Multiplier": product_multiplier,
-        "Rate map": rate_map,
-        "Scores": scores,
-        "Total price": round(total, 1),
-        "Total price (after tax)": round(total * 1.1, 1)
+        "TIMESTAMP": timestamp,
+        "CUSTOMER NAME": customer,
+        "PRODUCT": products,
+        "BASE PRICE PER SECTION": section_base,
+        "PRODUCT UNIT": product_unit,
+        "MULTIPLIER": product_multiplier,
+        "SCORE": total_rate_score,
+        "TOTAL PRICE": round(total, 1)
     }
 
     new_data = pd.DataFrame([row_data], columns=df_records.columns, index=[new_index])
     df_records = pd.concat([df_records, new_data], ignore_index=True) 
-    conn.update(worksheet="CLEANING SERVICE RECORDS", data=df_records)
+    conn.update(worksheet="CLEANING RECORDS", data=df_records)
 
     for k, v in defaults.items():
         st.session_state[k] = v
-    st.toast("Cleaning records saved successfully!")
-    time.sleep(3)
+    st.success("Cleaning records saved successfully!")
 
 submitted = st.button("Save cleaning records", on_click=save_and_clear)
 
