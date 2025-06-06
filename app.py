@@ -6,8 +6,29 @@ from datetime import datetime
 import base64
 from PIL import Image
 import io
+import time
 
 st.title("🧼 GA CLEANING SERVICE")
+
+if st.experimental_user.is_logged_in == False:
+    st.write("Please login to access the app.")
+    st.button("🔐 Login with Google", on_click=st.login, args=("google",))
+    st.stop()
+
+if st.experimental_user.email not in st.secrets["allowed_users"]["emails"]:
+    st.error("Access denied. You’re not authorized to view this app.")
+    time.sleep(3)
+    st.logout()
+    st.stop()
+else:
+    st.toast(f"Welcome {st.experimental_user.name} !")
+    time.sleep(0.5)
+
+
+# Add Nav Bar
+st.sidebar.title(f"{st.experimental_user.name}")
+st.sidebar.write(f"({st.experimental_user.email})")
+st.sidebar.button("Logout", on_click=st.logout, args=(), help="Click to logout from the app.")
 
 # Load data from Google Sheets
 conn = st.connection("gsheets", type=GSheetsConnection)
