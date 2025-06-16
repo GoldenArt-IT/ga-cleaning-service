@@ -179,7 +179,8 @@ else:
     st.table(df_type)
 
 col1, col2 = st.columns([1,1])
-col1.metric("Cleaning price", f"RM {round(total, 1):.2f}")
+discount = col1.radio("Discount (RM)", options=[0, 5, 10], index=0, horizontal=True)
+col2.metric("Cleaning price", f"RM {round(total - discount, 1):.2f}")
 # col2.metric("Cleaning price (after tax)", f"RM {round(total*1.1, 1):.2f}")
 
 def save_and_clear():
@@ -195,7 +196,8 @@ def save_and_clear():
         "PRODUCT UNIT": product_unit,
         "MULTIPLIER": product_multiplier,
         "SCORE": total_rate_score,
-        "TOTAL PRICE": round(total, 1)
+        "TOTAL PRICE": round(total - discount, 1),
+        "DISCOUNT (RM)": discount
     }
 
     new_data = pd.DataFrame([row_data], columns=df_records.columns, index=[new_index])
