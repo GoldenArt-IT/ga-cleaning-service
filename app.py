@@ -20,9 +20,6 @@ if st.experimental_user.email not in st.secrets["allowed_users"]["emails"]:
     time.sleep(3)
     st.logout()
     st.stop()
-else:
-    st.toast(f"Welcome {st.experimental_user.name} !")
-    time.sleep(0.5)
 
 
 # Add Nav Bar
@@ -72,7 +69,17 @@ for k, v in defaults.items():
         st.session_state[k] = v
 
 # Pick item
-customer = st.selectbox("Select customer", df_arrangement["CUST NAME"].unique(), key="customer")
+customer = st.selectbox("Select customer", df_arrangement["CUST NAME"].unique(), key="customer", index=0)
+
+if customer is None:
+    st.error("No customer found. Please add a customer in the GA Cleaning Service Records.")
+    st.error("Please press the refresh button to reload the customer list.")
+
+    # Diplay refresh button
+    st.button("Refresh", on_click=load_data_ALWAYS_RELOAD, args=("RECORDS", 1, True), help="Click to refresh the customer list.", key="refresh")
+
+    st.stop()
+
 products = st.selectbox("Select product to service", df["PRODUCT TYPE"].unique(), key="product")
 product_row = df.query("`PRODUCT TYPE` == @products").squeeze() # get the row of the selected product
 
