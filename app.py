@@ -71,15 +71,6 @@ for k, v in defaults.items():
 # Pick item
 customer = st.selectbox("Select customer", df_arrangement["CUST NAME"].unique(), key="customer", index=0)
 
-if customer is None:
-    st.error("No customer found. Please add a customer in the GA Cleaning Service Records.")
-    st.error("Please press the refresh button to reload the customer list.")
-
-    # Diplay refresh button
-    st.button("Refresh", on_click=load_data_ALWAYS_RELOAD, args=("RECORDS", 1, True), help="Click to refresh the customer list.", key="refresh")
-
-    st.stop()
-
 products = st.selectbox("Select product to service", df["PRODUCT TYPE"].unique(), key="product")
 product_row = df.query("`PRODUCT TYPE` == @products").squeeze() # get the row of the selected product
 
@@ -215,10 +206,19 @@ def save_and_clear():
         st.session_state[k] = v
     st.success("Cleaning records saved successfully!")
 
+if customer is None:
+    st.error("No customer found. Please add a customer in the GA Cleaning Service Records.")
+    st.error("Please press the refresh button to reload the customer list.")
+
+    # Diplay refresh button
+    st.button("Refresh", on_click=load_data_ALWAYS_RELOAD, args=("RECORDS", 1, True), help="Click to refresh the customer list.", key="refresh")
+
+    st.stop()
+
 submitted = st.button("Save cleaning records", on_click=save_and_clear)
 
 
-# Uncomment the following lines to see the debug information
+# debug information
 # st.write("Selected Product:", products)
 # st.write("Base price per section:", section_base)
 # st.write("Product Unit:", product_unit)
