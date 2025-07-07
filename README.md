@@ -1,6 +1,8 @@
 # 🧼 GA Cleaning Service
 
-A **Streamlit** app to manage, calculate, and track cleaning service jobs, integrated with **Google Sheets** for real-time data.
+A **Streamlit** app to manage, calculate, and track cleaning service jobs, integrated with **Google Sheets** for real-time data storage.
+
+[👉 **Access the Live App Here**](https://ga-cleaning-service.streamlit.app/)
 
 ---
 
@@ -18,73 +20,106 @@ A **Streamlit** app to manage, calculate, and track cleaning service jobs, integ
 
 ## ✨ Features
 
-- Google Authentication (only whitelisted users can log in)
-- Dynamic Pricing (based on product type and conditions)
-- Google Sheets Integration (reads and updates records)
-- Session Persistence (keeps user selections)
-- Custom Layout Display (shows cleaning steps per product)
+- **Google Authentication**  
+  Only whitelisted users can log in.
+- **Dynamic Pricing**  
+  Pricing adjusts based on:
+  - Product type
+  - Dirt level
+  - Condition
+  - Service duration
+- **Google Sheets Integration**  
+  Reads settings, current records, and writes completed jobs.
+- **Session Persistence**  
+  Keeps user selections during the session.
+- **Custom Layout Display**  
+  Shows cleaning steps depending on the product type.
 
 ---
 
 ## ⚙️ Installation
 
 1. **Clone the repository**
-```bash
-git clone https://github.com/your-org/ga-cleaning-service.git
+   ```bash
+   git clone https://github.com/your-org/ga-cleaning-service.git
 
-cd ga-cleaning-service
-```
+   cd ga-cleaning-service
+   ```
 
 2. **Install dependencies**
-```pip install -r requirements.txt```
 
-3. **Create** ```secrets.toml```
-```bahs
-[connections.gsheets]
-email = "your_service_account_email"
-private_key = "-----BEGIN PRIVATE KEY-----\n..."
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-[allowed_users]
-emails = ["user1@example.com", "user2@example.com"]
-```
+3. **Create** `.streamlit/secrets.toml`
+
+   ```toml
+   [gsheets]
+   credentials = "<YOUR GOOGLE SERVICE ACCOUNT JSON>"
+   spreadsheet = "<YOUR GOOGLE SHEET URL>"
+
+   [allowed_users]
+   emails = ["user1@example.com", "user2@example.com"]
+   ```
 
 4. **Run the app**
 
+   ```bash
+   streamlit run app.py
+   ```
+
+---
+
 ## ⚙️ Configuration
 
-- **Google Sheets Connection**
-- Make sure your service account has editor access to your Google Sheets.
+* **Google Sheets Connection**
 
-- **Allowed Users**
-- Only emails listed in `[allowed_users]` are permitted.
+  * Your service account must have Editor access to the Google Sheet.
+  * The spreadsheet must contain these worksheets:
+
+    * `SETTING`
+    * `RECORDS`
+    * `CLEANING RECORDS`
+
+* **Allowed Users**
+
+  * Only emails listed under `[allowed_users]` are permitted to access.
 
 ---
 
 ## 🛠️ Usage
 
 1. **Login**
-- Sign in with Google.
-- Unauthorized users will be denied.
+
+   * Sign in with Google.
+   * Unauthorized users will see an error and be logged out.
 
 2. **Select Customer**
-- Choose a customer with `ON PROGRESS` status.
+
+   * Choose a customer with `ON PROGRESS` status.
 
 3. **Select Product**
-- Pick the product.
-- If required, enter the multiplier (e.g., area in square meters).
+
+   * Pick a product to clean.
+   * If required, enter the multiplier (e.g., carpet size).
 
 4. **Rate the Condition**
-- Four criteria:
-  - Skala Kekotoran
-  - Tahap Kekotoran
-  - Kondisi Barang
-  - Masa Siap Service
 
-5. **Apply Discounts**
-- Select discount amount if needed.
+   * Four rating categories:
+
+     * Skala Kekotoran
+     * Tahap Kekotoran
+     * Kondisi Barang
+     * Masa Siap Service
+
+5. **Apply Discount**
+
+   * Select RM discount if applicable.
 
 6. **Save Record**
-- Click **Save cleaning records** to update Google Sheets.
+
+   * Click **Save cleaning records** to update the `CLEANING RECORDS` worksheet.
 
 ---
 
@@ -92,40 +127,43 @@ emails = ["user1@example.com", "user2@example.com"]
 
 **Scenario:**
 
-- Customer: Ali Furniture
-- Product: CARPET
-- Multiplier: 5
-- Ratings:
-- Skala Kekotoran: 2
-- Tahap Kekotoran: LEVEL 3
-- Kondisi Barang: GRED B
-- Masa Siap: 2 JAM - 4 JAM
-- Discount: RM5
+* **Customer:** Ali Furniture
+* **Product:** CARPET
+* **Multiplier:** 5
+* **Ratings:**
+
+  * Skala Kekotoran: 2
+  * Tahap Kekotoran: LEVEL 3
+  * Kondisi Barang: GRED B
+  * Masa Siap Service: 2 JAM - 4 JAM
+* **Discount:** RM5
 
 **Daily Habit Example:**
 
-- After every cleaning job:
-- Open the app.
-- Select customer and product.
-- Enter multiplier and condition ratings.
-- Save the record before leaving.
+* After each cleaning job:
+
+  * Open the app.
+  * Select customer and product.
+  * Enter the multiplier and ratings.
+  * Save the record before leaving the site.
 
 ---
 
 ## 📂 Project Structure
+
 ```bash
 ga-cleaning-service/
-├── app.py # Main application script
-├── requirements.txt # Dependency list
-└── README.md # This README file
+├── app.py                # Main Streamlit application script
+├── requirements.txt      # List of dependencies
+└── README.md             # This README file
 ```
 
 ---
 
 ## 📚 Reference
 
-- [Streamlit Documentation](https://docs.streamlit.io)
-- [streamlit_gsheets](https://github.com/streamlit/streamlit-gsheets)
-- [Google Sheets API](https://developers.google.com/sheets/api)
+* [Streamlit Documentation](https://docs.streamlit.io)
+* [streamlit\_gsheets](https://github.com/streamlit/streamlit-gsheets)
+* [Google Sheets API](https://developers.google.com/sheets/api)
+* [👉 Access the GA Cleaning Service App](https://ga-cleaning-service.streamlit.app/)
 
----
