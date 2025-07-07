@@ -29,7 +29,7 @@ A **Streamlit** app to manage, calculate, and track cleaning service jobs, integ
 ## ⚙️ Installation
 
 1. **Clone the repository**
-```toml
+```bash
 git clone https://github.com/your-org/ga-cleaning-service.git
 
 cd ga-cleaning-service
@@ -39,7 +39,7 @@ cd ga-cleaning-service
 ```pip install -r requirements.txt```
 
 3. **Create** ```secrets.toml```
-```toml
+```bahs
 [connections.gsheets]
 email = "your_service_account_email"
 private_key = "-----BEGIN PRIVATE KEY-----\n..."
@@ -113,7 +113,7 @@ emails = ["user1@example.com", "user2@example.com"]
 ---
 
 ## 📂 Project Structure
-```toml
+```bash
 ga-cleaning-service/
 ├── app.py # Main application script
 ├── requirements.txt # Dependency list
